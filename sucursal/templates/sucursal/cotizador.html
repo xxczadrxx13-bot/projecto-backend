@@ -1,0 +1,52 @@
+{% extends 'sucursal/base.html' %}
+{% block content %}
+<div class="row">
+    <div class="col-md-5">
+        <div class="card card-custom p-4">
+            <h4 class="fw-bold mb-3"><i class="bi bi-calculator text-danger"></i> Cotizador de Venta</h4>
+            <form method="POST">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label">Producto</label>
+                    <select name="producto_id" class="form-select bg-dark text-light border-secondary" required>
+                        <option value="">Seleccione un instrumento...</option>
+                        {% for p in productos %}
+                            <option value="{{ p.id }}">{{ p.nombre }} (${{ p.precio }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Cantidad</label>
+                    <input type="number" name="cantidad" value="1" min="1" class="form-control bg-dark text-light border-secondary" required>
+                </div>
+                <div class="form-check mb-4">
+                    <input type="checkbox" name="club_socio" class="form-check-input" id="socio">
+                    <label class="form-check-label" for="socio">Descuento Club Music Pro (10%)</label>
+                </div>
+                <button type="submit" class="btn btn-brand w-100">Calcular Total</button>
+            </form>
+        </div>
+    </div>
+    <div class="col-md-7">
+        {% if cotizacion %}
+        <div class="card card-custom p-4 border-danger">
+            <h4 class="fw-bold text-danger">Resumen de Cotización</h4>
+            <hr class="border-secondary">
+            <p><strong>Producto:</strong> {{ cotizacion.producto }} ({{ cotizacion.codigo }})</p>
+            <p><strong>Precio Unitario:</strong> ${{ cotizacion.precio_unitario }}</p>
+            <p><strong>Cantidad:</strong> {{ cotizacion.cantidad }}</p>
+            <p><strong>Subtotal:</strong> ${{ cotizacion.subtotal }}</p>
+            {% if cotizacion.socio %}
+                <p class="text-warning"><strong>Descuento Socio (10%):</strong> -${{ cotizacion.descuento }}</p>
+            {% endif %}
+            <p><strong>IVA (19%):</strong> ${{ cotizacion.iva }}</p>
+            <h3 class="text-danger fw-bold mt-3">Total: ${{ cotizacion.total }} CLP</h3>
+        </div>
+        {% else %}
+        <div class="card card-custom p-5 text-center text-secondary">
+            <h5>Seleccione un producto para generar un presupuesto en mesón.</h5>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

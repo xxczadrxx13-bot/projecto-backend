@@ -1,0 +1,52 @@
+[
+  {
+    "id": 1,
+    "codigo": "GTR-001",
+    "nombre": "Fender Stratocaster Player II",
+    "categoria": "Instrumentos",
+    "descripcion": "Guitarra eléctrica con pastillas Alnico V y diapasón de palisandro.",
+    "precio": 899990,
+    "stock": 8,
+    "imagen": "https://images.unsplash.com/photo-1516924962500-2b4b3b99ea02?w=500"
+  },
+  {
+    "id": 2,
+    "codigo": "AMP-002",
+    "nombre": "Marshall DSL40CR",
+    "categoria": "Audio y Sonido",
+    "descripcion": "Amplificador valvular de 40W para guitarra con altavoz Celestion.",
+    "precio": 749990,
+    "stock": 4,
+    "imagen": "https://images.unsplash.com/photo-1541689592655-f5f52825a3b8?w=500"
+  },
+  {
+    "id": 3,
+    "codigo": "MIC-003",
+    "nombre": "Shure SM7B",
+    "categoria": "Audio y Sonido",
+    "descripcion": "Micrófono dinámico cardioide para locución, estudio y transmisión.",
+    "precio": 419990,
+    "stock": 12,
+    "imagen": "https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=500"
+  },
+  {
+    "id": 4,
+    "codigo": "ACC-004",
+    "nombre": "Cable Fender Custom Shop 3m",
+    "categoria": "Accesorios",
+    "descripcion": "Cable apantallado de alta fidelidad libre de ruidos parásitos.",
+    "precio": 24990,
+    "stock": 25,
+    "imagen": "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500"
+  },
+  {
+    "id": 5,
+    "codigo": "DFSDFDSSDFSDF",
+    "nombre": "jhojhkjdfs",
+    "categoria": "Instrumentos",
+    "descripcion": "variax shuriken marca line 6",
+    "precio": 12000,
+    "stock": 15,
+    "imagen": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT8F7sSGUTF_EobGSuqJ-Ce41TDY-G_yW57pqCcJGdmfg&s=10"
+  }
+]

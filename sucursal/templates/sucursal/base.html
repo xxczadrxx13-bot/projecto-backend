@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Pro - Sucursal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        body { background-color: #121418; color: #e5e7eb; }
+        .navbar-custom { background-color: #1a1d24; border-bottom: 2px solid #e11d48; }
+        .card-custom { background-color: #1a1d24; border: 1px solid #2d3139; color: #fff; }
+        .btn-brand { background-color: #e11d48; color: #fff; }
+        .btn-brand:hover { background-color: #be123c; color: #fff; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom mb-4">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="{% url 'vitrina' %}">
+                <i class="bi bi-music-note-beamed text-danger"></i> MUSIC PRO <span class="badge bg-danger">POS / Sucursal</span>
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="{% url 'vitrina' %}">Vitrina Digital</a>
+                <a class="nav-link" href="{% url 'cotizador' %}">Cotizador de Mesón</a>
+                <a class="nav-link" href="{% url 'admin_productos' %}">Inventario Local</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

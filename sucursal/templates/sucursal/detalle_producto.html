@@ -1,0 +1,24 @@
+{% extends 'sucursal/base.html' %}
+{% block content %}
+<div class="card card-custom p-4">
+    <div class="row g-4">
+        <div class="col-md-5">
+            <img src="{{ producto.imagen }}" class="img-fluid rounded border border-secondary" alt="{{ producto.nombre }}">
+        </div>
+        <div class="col-md-7">
+            <span class="badge bg-danger mb-2">{{ producto.categoria }}</span>
+            <h2 class="fw-bold">{{ producto.nombre }}</h2>
+            <p class="text-secondary">Código SKU: <strong>{{ producto.codigo }}</strong></p>
+            <h3 class="text-danger my-3">${{ producto.precio }} CLP</h3>
+            <p>{{ producto.descripcion }}</p>
+            <div class="alert alert-dark border-secondary">
+                Disponibilidad actual: <strong class="text-success">{{ producto.stock }} unidades</strong> en tienda.
+            </div>
+            <div class="d-flex gap-2 mt-4">
+                <a href="{% url 'vitrina' %}" class="btn btn-outline-secondary">Volver al Catálogo</a>
+                <a href="{% url 'cotizador' %}" class="btn btn-brand">Ir al Cotizador</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
