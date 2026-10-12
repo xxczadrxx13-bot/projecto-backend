@@ -1,54 +1,37 @@
-import json
-import os
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from django.conf import settings
-
-DATA_FILE = os.path.join(settings.BASE_DIR, 'sucursal', 'data', 'productos.json')
-
-def cargar_productos():
-    if not os.path.exists(DATA_FILE):
-        return []
-    with open(DATA_FILE, 'r', encoding='utf-8') as f:
-        return json.load(f)
-
-def guardar_productos(lista):
-    with open(DATA_FILE, 'w', encoding='utf-8') as f:
-        json.dump(lista, f, indent=2, ensure_ascii=False)
+from django.db.models import Q
+from .models import Categoria, Producto
 
 def vitrina_view(request):
-    productos = cargar_productos()
-    categoria_filtro = request.GET.get('categoria', '').strip()
-    busqueda = request.GET.get('q', '').strip().lower()
+    productos = Producto.objects.filter(activo=True)
+    categoria_id = request.GET.get('categoria', '').strip()
+    busqueda = request.GET.get('q', '').strip()
 
-    if categoria_filtro:
-        productos = [p for p in productos if p.get('categoria') == categoria_filtro]
+    if categoria_id:
+        productos = productos.filter(categoria_id=categoria_id)
 
     if busqueda:
-        productos = [p for p in productos if busqueda in p.get('nombre', '').lower() or busqueda in p.get('codigo', '').lower()]
+        productos = productos.filter(
+            Q(nombre__icontains=busqueda) | Q(codigo__icontains=busqueda)
+        )
 
-    categorias = sorted(list(set([p.get('categoria') for p in cargar_productos() if p.get('categoria')])))
+    categorias = Categoria.objects.all()
 
     context = {
-        'productos': productos,
+        'productos': productos[:60], # Paginación visual inicial
         'categorias': categorias,
-        'categoria_seleccionada': categoria_filtro,
+        'categoria_seleccionada': int(categoria_id) if categoria_id.isdigit() else None,
         'busqueda': busqueda,
     }
     return render(request, 'sucursal/vitrina.html', context)
 
 def detalle_producto_view(request, producto_id):
-    productos = cargar_productos()
-    producto = next((p for p in productos if p.get('id') == producto_id), None)
-
-    if not producto:
-        messages.error(request, "El producto seleccionado no existe.")
-        return redirect('vitrina')
-
+    producto = get_object_or_404(Producto, id=producto_id)
     return render(request, 'sucursal/detalle_producto.html', {'producto': producto})
 
 def cotizador_view(request):
-    productos = cargar_productos()
+    productos = Producto.objects.filter(activo=True, stock__gt=0)[:100]
     cotizacion = None
 
     if request.method == 'POST':
@@ -57,19 +40,19 @@ def cotizador_view(request):
             cantidad = int(request.POST.get('cantidad', 1))
             es_club = request.POST.get('club_socio') == 'on'
 
-            producto = next((p for p in productos if p.get('id') == prod_id), None)
+            producto = Producto.objects.filter(id=prod_id).first()
 
             if producto and cantidad > 0:
-                subtotal = producto['precio'] * cantidad
+                subtotal = producto.precio * cantidad
                 descuento = int(subtotal * 0.10) if es_club else 0
                 neto = subtotal - descuento
                 iva = int(neto * 0.19)
                 total = neto + iva
 
                 cotizacion = {
-                    'producto': producto['nombre'],
-                    'codigo': producto['codigo'],
-                    'precio_unitario': producto['precio'],
+                    'producto': producto.nombre,
+                    'codigo': producto.codigo,
+                    'precio_unitario': producto.precio,
                     'cantidad': cantidad,
                     'subtotal': subtotal,
                     'descuento': descuento,
@@ -77,46 +60,44 @@ def cotizador_view(request):
                     'total': total,
                     'socio': es_club
                 }
-                messages.success(request, "Cotización generada exitosamente.")
+                messages.success(request, "Cotización generada exitosamente desde la Base de Datos.")
             else:
-                messages.error(request, "Seleccione un producto y una cantidad válida.")
-        except ValueError:
-            messages.error(request, "Formato numérico no válido.")
+                messages.error(request, "Seleccione un producto disponible.")
+        except (ValueError, TypeError):
+            messages.error(request, "Datos numéricos no válidos.")
 
     return render(request, 'sucursal/cotizador.html', {'productos': productos, 'cotizacion': cotizacion})
 
 def admin_productos_view(request):
-    productos = cargar_productos()
+    categorias = Categoria.objects.all()
+    productos = Producto.objects.select_related('categoria').all()[:50]
 
     if request.method == 'POST':
         nombre = request.POST.get('nombre', '').strip()
         codigo = request.POST.get('codigo', '').strip().upper()
-        categoria = request.POST.get('categoria', '').strip()
-        descripcion = request.POST.get('descripcion', '').strip()
+        categoria_id = request.POST.get('categoria_id')
         precio_str = request.POST.get('precio', '0')
         stock_str = request.POST.get('stock', '0')
         imagen = request.POST.get('imagen', '').strip()
+        descripcion = request.POST.get('descripcion', '').strip()
 
-        if not nombre or not codigo or not categoria:
-            messages.error(request, "Todos los campos principales son obligatorios.")
+        if not nombre or not codigo or not categoria_id:
+            messages.error(request, "Todos los campos obligatorios deben ser completados.")
         else:
             try:
-                nuevo_id = max([p['id'] for p in productos], default=0) + 1
-                nuevo = {
-                    "id": nuevo_id,
-                    "codigo": codigo,
-                    "nombre": nombre,
-                    "categoria": categoria,
-                    "descripcion": descripcion or "Sin descripción.",
-                    "precio": int(precio_str),
-                    "stock": int(stock_str),
-                    "imagen": imagen or "https://via.placeholder.com/400x300?text=Music+Pro"
-                }
-                productos.append(nuevo)
-                guardar_productos(productos)
-                messages.success(request, f"Producto {nombre} agregado con éxito al catálogo JSON.")
+                categoria = Categoria.objects.get(id=categoria_id)
+                Producto.objects.create(
+                    codigo=codigo,
+                    nombre=nombre,
+                    categoria=categoria,
+                    precio=int(precio_str),
+                    stock=int(stock_str),
+                    imagen=imagen or "https://via.placeholder.com/400x300?text=Music+Pro",
+                    descripcion=descripcion
+                )
+                messages.success(request, f"Producto {nombre} guardado en la Base de Datos.")
                 return redirect('admin_productos')
-            except ValueError:
-                messages.error(request, "Precio y Stock deben ser números enteros.")
+            except Exception as e:
+                messages.error(request, f"Error al guardar: {e}")
 
-    return render(request, 'sucursal/admin_productos.html', {'productos': productos})
+    return render(request, 'sucursal/admin_productos.html', {'productos': productos, 'categorias': categorias})
