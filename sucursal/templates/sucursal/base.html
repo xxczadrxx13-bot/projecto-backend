@@ -3,44 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Music Pro - Sucursal</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <title>Music Pro · Tienda y Administración</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
-        body { background-color: #121418; color: #e5e7eb; }
-        .navbar-custom { background-color: #1a1d24; border-bottom: 2px solid #e11d48; }
-        .card-custom { background-color: #1a1d24; border: 1px solid #2d3139; color: #fff; }
-        .btn-brand { background-color: #e11d48; color: #fff; }
-        .btn-brand:hover { background-color: #be123c; color: #fff; }
+        body { background-color: #f8f9fa; color: #212529; }
+        .navbar-custom { background-color: #1a1d24; border-bottom: 3px solid #dc3545; }
+        .card-custom { border: 1px solid #dee2e6; border-radius: 8px; }
     </style>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark navbar-custom mb-4">
         <div class="container">
+            <!-- Logo principal: lleva directo a la tienda pública -->
             <a class="navbar-brand fw-bold" href="{% url 'vitrina' %}">
-                <i class="bi bi-music-note-beamed text-danger"></i> MUSIC PRO <span class="badge bg-danger">POS / Sucursal</span>
+                <i class="bi bi-music-note-beamed text-danger"></i> MUSIC PRO 
+                <span class="badge bg-danger ms-1">Tienda</span>
             </a>
-            <div class="navbar-nav ms-auto">
-                <a class="nav-link" href="{% url 'vitrina' %}">Vitrina Digital</a>
-                <a class="nav-link" href="{% url 'cotizador' %}">Cotizador de Mesón</a>
-                <a class="nav-link" href="{% url 'admin_productos' %}">Inventario Local</a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navMenu">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <!-- Enlace siempre visible al catálogo público -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'vitrina' %}">Tienda Pública</a>
+                    </li>
+
+                    {% if user.is_authenticated %}
+                        <!-- Enlaces visibles solo si iniciaste sesión -->
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'admin_dashboard' %}">Panel</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'productos_lista' %}">Productos</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'reportes' %}">Reportes ORM</a>
+                        </li>
+                        {% if user.is_superuser %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'usuarios_gestion' %}">Usuarios</a>
+                        </li>
+                        {% endif %}
+                        <li class="nav-item ms-lg-3">
+                            <form method="POST" action="{% url 'logout' %}" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-outline-light btn-sm">
+                                    <i class="bi bi-box-arrow-right"></i> Salir ({{ user.username }})
+                                </button>
+                            </form>
+                        </li>
+                    {% else %}
+                        <!-- Enlace si no has iniciado sesión -->
+                        <li class="nav-item">
+                            <a class="nav-link btn btn-outline-danger btn-sm text-white px-3 ms-2" href="{% url 'login' %}">
+                                Iniciar Sesión
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
             </div>
         </div>
     </nav>
 
-    <div class="container">
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            {% endfor %}
-        {% endif %}
+    <main class="container">
+        {% block content %}
+        {% endblock %}
+    </main>
 
-        {% block content %}{% endblock %}
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
