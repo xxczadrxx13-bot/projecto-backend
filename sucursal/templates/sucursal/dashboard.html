@@ -1,0 +1,70 @@
+{% extends 'sucursal/base.html' %}
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Panel Administrativo · Music Pro</h2>
+        <div class="d-flex gap-2">
+            <a href="{% url 'productos_lista' %}" class="btn btn-outline-primary">Gestión de Productos</a>
+            <a href="{% url 'reportes' %}" class="btn btn-outline-success">Reportes ORM</a>
+            {% if user.is_superuser %}
+            <a href="{% url 'usuarios_gestion' %}" class="btn btn-outline-dark">Usuarios</a>
+            {% endif %}
+            <form method="POST" action="{% url 'logout' %}" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">Cerrar Sesión</button>
+            </form>
+        </div>
+    </div>
+
+    {% if messages %}
+        {% for m in messages %}
+            <div class="alert alert-{{ m.tags }}">{{ m }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card text-white bg-primary p-3">
+                <h5>Productos Activos</h5>
+                <h2 class="fw-bold">{{ total_productos }}</h2>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-success p-3">
+                <h5>Ingresos Totales</h5>
+                <h2 class="fw-bold">${{ ingresos|floatformat:0 }}</h2>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-info p-3">
+                <h5>Clientes</h5>
+                <h2 class="fw-bold">{{ total_clientes }}</h2>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-warning p-3">
+                <h5>Total Ventas</h5>
+                <h2 class="fw-bold">{{ total_ventas }}</h2>
+            </div>
+        </div>
+    </div>
+
+    <h4>Stock Crítico (Productos bajo el mínimo)</h4>
+    <table class="table table-bordered table-hover">
+        <thead class="table-light">
+            <tr>
+                <th>SKU</th><th>Producto</th><th>Stock Actual</th><th>Stock Mínimo</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in stock_critico %}
+            <tr class="table-danger">
+                <td>{{ p.sku }}</td><td>{{ p.nombre }}</td><td>{{ p.stock }}</td><td>{{ p.stock_minimo }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4" class="text-center text-muted">No existen alertas de inventario crítico.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

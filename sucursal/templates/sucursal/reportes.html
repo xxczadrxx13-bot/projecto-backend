@@ -1,0 +1,70 @@
+{% extends 'sucursal/base.html' %}
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Reportes Comerciales · Tienda Music Pro (Django ORM)</h2>
+        <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary">Volver al Panel</a>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">Top 5 Productos Más Vendidos</div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        {% for item in q5_top_vendidos %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            {{ item.producto__nombre }}
+                            <span class="badge bg-primary rounded-pill">{{ item.total_unidades }} unidades</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header bg-success text-white">Top 5 Clientes por Monto de Compra</div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        {% for c in q6_top_clientes %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            {{ c.nombre }}
+                            <span class="badge bg-success rounded-pill">${{ c.monto_total|floatformat:0 }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header bg-dark text-white">Top 10 Productos con Mayor Precio</div>
+        <div class="card-body">
+            <table class="table table-sm table-bordered">
+                <thead><tr><th>SKU</th><th>Nombre</th><th>Categoría</th><th>Precio</th></tr></thead>
+                <tbody>
+                    {% for p in q3_top_caros %}
+                    <tr><td>{{ p.sku }}</td><td>{{ p.nombre }}</td><td>{{ p.categoria.nombre }}</td><td>${{ p.precio }}</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header bg-warning text-dark">Productos sin Ventas Registradas</div>
+        <div class="card-body">
+            <ul>
+                {% for p in q8_sin_ventas %}
+                <li>{{ p.sku }} - {{ p.nombre }} (Stock: {{ p.stock }})</li>
+                {% empty %}
+                <li>Todos los productos cuentan con ventas.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

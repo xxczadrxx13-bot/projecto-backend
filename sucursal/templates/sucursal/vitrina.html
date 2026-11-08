@@ -1,46 +1,71 @@
 {% extends 'sucursal/base.html' %}
+
 {% block content %}
-<div class="row mb-4">
+<div class="row mb-4 align-items-center">
     <div class="col-md-6">
-        <h3 class="fw-bold"><i class="bi bi-shop text-danger"></i> Vitrina de Productos</h3>
-        <p class="text-secondary">Consulta el stock y modelos disponibles en sucursal.</p>
+        <h2 class="fw-bold"><i class="bi bi-shop text-danger"></i> Catálogo Music Pro</h2>
+        <p class="text-muted mb-0">Explora nuestros instrumentos y equipos de audio disponibles.</p>
     </div>
     <div class="col-md-6">
-        <form method="GET" class="d-flex gap-2">
-            <input type="text" name="q" class="form-control bg-dark text-light border-secondary" placeholder="Buscar..." value="{{ busqueda }}">
-            <select name="categoria" class="form-select bg-dark text-light border-secondary w-auto">
-                <option value="">Todas las Categorías</option>
-                {% for cat in categorias %}
-                    <option value="{{ cat }}" {% if cat == categoria_seleccionada %}selected{% endif %}>{{ cat }}</option>
-                {% endfor %}
-            </select>
-            <button class="btn btn-brand" type="submit"><i class="bi bi-search"></i></button>
+        <form method="GET" action="{% url 'vitrina' %}" class="d-flex gap-2">
+            <input type="text" name="q" class="form-control" placeholder="Buscar producto..." value="{{ busqueda }}">
+            {% if categoria_activa %}
+                <input type="hidden" name="categoria" value="{{ categoria_activa }}">
+            {% endif %}
+            <button type="submit" class="btn btn-dark">Buscar</button>
+            {% if busqueda or categoria_activa %}
+                <a href="{% url 'vitrina' %}" class="btn btn-outline-secondary">Limpiar</a>
+            {% endif %}
         </form>
     </div>
 </div>
 
-<div class="row g-4">
+<!-- Filtros de categorías -->
+<div class="d-flex gap-2 flex-wrap mb-4">
+    <a href="{% url 'vitrina' %}" class="btn btn-sm {% if not categoria_activa %}btn-danger{% else %}btn-outline-dark{% endif %}">
+        Todas las categorías
+    </a>
+    {% for cat in categorias %}
+        <a href="{% url 'vitrina' %}?categoria={{ cat.id }}{% if busqueda %}&q={{ busqueda }}{% endif %}" 
+           class="btn btn-sm {% if categoria_activa == cat.id %}btn-danger{% else %}btn-outline-dark{% endif %}">
+            {{ cat.nombre }}
+        </a>
+    {% endfor %}
+</div>
+
+<!-- Grid de tarjetas de productos -->
+<div class="row row-cols-1 row-cols-md-3 g-4">
     {% for p in productos %}
-    <div class="col-md-4 col-lg-3">
-        <div class="card card-custom h-100">
-            <img src="{{ p.imagen }}" class="card-img-top" style="height: 180px; object-fit: cover;" alt="{{ p.nombre }}">
-            <div class="card-body d-flex flex-column">
-                <span class="badge bg-secondary mb-2 align-self-start">{{ p.categoria }}</span>
-                <h6 class="fw-bold">{{ p.nombre }}</h6>
-                <p class="text-secondary small mb-1">SKU: {{ p.codigo }}</p>
-                <div class="d-flex justify-content-between align-items-center mt-auto pt-2">
-                    <span class="fs-5 fw-bold text-danger">${{ p.precio }}</span>
-                    <span class="badge bg-success">Stock: {{ p.stock }}</span>
-                </div>
+    <div class="col">
+        <div class="card h-100 shadow-sm border-0 overflow-hidden">
+            <!-- Contenedor de la Imagen Referencial -->
+            <div style="height: 220px; background-color: #ffffff;" class="d-flex align-items-center justify-content-center border-bottom p-2">
+                {% if p.imagen_url %}
+                    <img src="{{ p.imagen_url }}" class="w-100 h-100 object-fit-contain" alt="{{ p.nombre }}">
+                {% else %}
+                    <i class="bi bi-music-note-beamed text-muted" style="font-size: 3.5rem;"></i>
+                {% endif %}
             </div>
-            <div class="card-footer border-secondary bg-transparent">
-                <a href="{% url 'detalle_producto' p.id %}" class="btn btn-outline-light btn-sm w-100">Ver Ficha</a>
+
+            <div class="card-body d-flex flex-column">
+                <span class="badge bg-secondary mb-2 align-self-start">{{ p.categoria.nombre }}</span>
+                <h5 class="card-title fw-bold text-dark">{{ p.nombre }}</h5>
+                <p class="text-muted small mb-2">SKU: {{ p.sku }}</p>
+                <div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-muted small d-block">Precio unitario</span>
+                        <h4 class="text-danger fw-bold mb-0">${{ p.precio|floatformat:0 }}</h4>
+                    </div>
+                    <span class="badge {% if p.stock > 0 %}bg-success{% else %}bg-danger{% endif %}">
+                        Stock: {{ p.stock }}
+                    </span>
+                </div>
             </div>
         </div>
     </div>
     {% empty %}
-    <div class="col-12 text-center py-5 text-secondary">
-        <h5>No hay productos que coincidan con la búsqueda.</h5>
+    <div class="col-12 text-center py-5">
+        <h5 class="text-muted">No se encontraron productos disponibles en el catálogo.</h5>
     </div>
     {% endfor %}
 </div>
